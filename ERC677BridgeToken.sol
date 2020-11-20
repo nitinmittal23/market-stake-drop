@@ -1,25 +1,28 @@
 // File: openzeppelin-solidity/contracts/token/ERC20/ERC20Basic.sol
 
-pragma solidity ^0.4.24;
+pragma solidity ^0.6.6;
 
 /**
  * @title ERC20Basic
  * @dev Simpler version of ERC20 interface
  * See https://github.com/ethereum/EIPs/issues/179
  */
-contract ERC20Basic {
-    function totalSupply() public view returns (uint256);
+abstract contract ERC20Basic {
+    function totalSupply() public virtual view returns (uint256);
 
-    function balanceOf(address _who) public view returns (uint256);
+    function balanceOf(address _who) public virtual view returns (uint256);
 
-    function transfer(address _to, uint256 _value) public returns (bool);
+    function transfer(address _to, uint256 _value)
+        public
+        virtual
+        returns (bool);
 
     event Transfer(address indexed from, address indexed to, uint256 value);
 }
 
 // File: openzeppelin-solidity/contracts/math/SafeMath.sol
 
-pragma solidity ^0.4.24;
+pragma solidity ^0.6.6;
 
 /**
  * @title SafeMath
@@ -72,7 +75,7 @@ library SafeMath {
 
 // File: openzeppelin-solidity/contracts/token/ERC20/BasicToken.sol
 
-pragma solidity ^0.4.24;
+pragma solidity ^0.6.6;
 
 /**
  * @title Basic token
@@ -88,7 +91,7 @@ contract BasicToken is ERC20Basic {
     /**
      * @dev Total number of tokens in existence
      */
-    function totalSupply() public view returns (uint256) {
+    function totalSupply() public override view returns (uint256) {
         return totalSupply_;
     }
 
@@ -97,7 +100,12 @@ contract BasicToken is ERC20Basic {
      * @param _to The address to transfer to.
      * @param _value The amount to be transferred.
      */
-    function transfer(address _to, uint256 _value) public returns (bool) {
+    function transfer(address _to, uint256 _value)
+        public
+        virtual
+        override
+        returns (bool)
+    {
         require(_value <= balances[msg.sender]);
         require(_to != address(0));
 
@@ -112,14 +120,14 @@ contract BasicToken is ERC20Basic {
      * @param _owner The address to query the the balance of.
      * @return An uint256 representing the amount owned by the passed address.
      */
-    function balanceOf(address _owner) public view returns (uint256) {
+    function balanceOf(address _owner) public override view returns (uint256) {
         return balances[_owner];
     }
 }
 
 // File: openzeppelin-solidity/contracts/token/ERC20/BurnableToken.sol
 
-pragma solidity ^0.4.24;
+pragma solidity ^0.6.6;
 
 /**
  * @title Burnable Token
@@ -132,7 +140,7 @@ contract BurnableToken is BasicToken {
      * @dev Burns a specific amount of tokens.
      * @param _value The amount of token to be burned.
      */
-    function burn(uint256 _value) public {
+    function burn(uint256 _value) public virtual {
         _burn(msg.sender, _value);
     }
 
@@ -150,15 +158,16 @@ contract BurnableToken is BasicToken {
 
 // File: openzeppelin-solidity/contracts/token/ERC20/ERC20.sol
 
-pragma solidity ^0.4.24;
+pragma solidity ^0.6.6;
 
 /**
  * @title ERC20 interface
  * @dev see https://github.com/ethereum/EIPs/issues/20
  */
-contract ERC20 is ERC20Basic {
+abstract contract ERC20 is ERC20Basic {
     function allowance(address _owner, address _spender)
         public
+        virtual
         view
         returns (uint256);
 
@@ -166,9 +175,12 @@ contract ERC20 is ERC20Basic {
         address _from,
         address _to,
         uint256 _value
-    ) public returns (bool);
+    ) public virtual returns (bool);
 
-    function approve(address _spender, uint256 _value) public returns (bool);
+    function approve(address _spender, uint256 _value)
+        public
+        virtual
+        returns (bool);
 
     event Approval(
         address indexed owner,
@@ -179,7 +191,7 @@ contract ERC20 is ERC20Basic {
 
 // File: openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol
 
-pragma solidity ^0.4.24;
+pragma solidity ^0.6.6;
 
 /**
  * @title Standard ERC20 token
@@ -201,7 +213,7 @@ contract StandardToken is ERC20, BasicToken {
         address _from,
         address _to,
         uint256 _value
-    ) public returns (bool) {
+    ) public virtual override returns (bool) {
         require(_value <= balances[_from]);
         require(_value <= allowed[_from][msg.sender]);
         require(_to != address(0));
@@ -222,7 +234,11 @@ contract StandardToken is ERC20, BasicToken {
      * @param _spender The address which will spend the funds.
      * @param _value The amount of tokens to be spent.
      */
-    function approve(address _spender, uint256 _value) public returns (bool) {
+    function approve(address _spender, uint256 _value)
+        public
+        override
+        returns (bool)
+    {
         allowed[msg.sender][_spender] = _value;
         emit Approval(msg.sender, _spender, _value);
         return true;
@@ -236,6 +252,7 @@ contract StandardToken is ERC20, BasicToken {
      */
     function allowance(address _owner, address _spender)
         public
+        override
         view
         returns (uint256)
     {
@@ -288,7 +305,7 @@ contract StandardToken is ERC20, BasicToken {
 
 // File: openzeppelin-solidity/contracts/ownership/Ownable.sol
 
-pragma solidity ^0.4.24;
+pragma solidity ^0.6.6;
 
 /**
  * @title Ownable
@@ -326,7 +343,7 @@ contract Ownable {
      * It will not be possible to call the functions with the `onlyOwner`
      * modifier anymore.
      */
-    function renounceOwnership() public onlyOwner {
+    function renounceOwnership() public virtual onlyOwner {
         emit OwnershipRenounced(owner);
         owner = address(0);
     }
@@ -352,7 +369,7 @@ contract Ownable {
 
 // File: openzeppelin-solidity/contracts/token/ERC20/MintableToken.sol
 
-pragma solidity ^0.4.24;
+pragma solidity ^0.6.6;
 
 /**
  * @title Mintable token
@@ -383,6 +400,7 @@ contract MintableToken is StandardToken, Ownable {
      */
     function mint(address _to, uint256 _amount)
         public
+        virtual
         hasMintPermission
         canMint
         returns (bool)
@@ -398,7 +416,7 @@ contract MintableToken is StandardToken, Ownable {
      * @dev Function to stop minting new tokens.
      * @return True if the operation was successful.
      */
-    function finishMinting() public onlyOwner canMint returns (bool) {
+    function finishMinting() public virtual onlyOwner canMint returns (bool) {
         mintingFinished = true;
         emit MintFinished();
         return true;
@@ -407,7 +425,7 @@ contract MintableToken is StandardToken, Ownable {
 
 // File: openzeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol
 
-pragma solidity ^0.4.24;
+pragma solidity ^0.6.6;
 
 /**
  * @title DetailedERC20 token
@@ -415,14 +433,14 @@ pragma solidity ^0.4.24;
  * All the operations are done using the smallest and indivisible token unit,
  * just as on Ethereum all the operations are done in wei.
  */
-contract DetailedERC20 is ERC20 {
+abstract contract DetailedERC20 is ERC20 {
     string public name;
     string public symbol;
     uint8 public decimals;
 
     constructor(
-        string _name,
-        string _symbol,
+        string memory _name,
+        string memory _symbol,
         uint8 _decimals
     ) public {
         name = _name;
@@ -433,7 +451,7 @@ contract DetailedERC20 is ERC20 {
 
 // File: openzeppelin-solidity/contracts/AddressUtils.sol
 
-pragma solidity ^0.4.24;
+pragma solidity ^0.6.6;
 
 /**
  * Utility library of inline functions on addresses
@@ -464,9 +482,9 @@ library AddressUtils {
 
 // File: contracts/interfaces/ERC677.sol
 
-pragma solidity 0.4.24;
+pragma solidity ^0.6.6;
 
-contract ERC677 is ERC20 {
+abstract contract ERC677 is ERC20 {
     event Transfer(
         address indexed from,
         address indexed to,
@@ -477,53 +495,55 @@ contract ERC677 is ERC20 {
     function transferAndCall(
         address,
         uint256,
-        bytes
-    ) external returns (bool);
+        bytes calldata
+    ) external virtual returns (bool);
 
     function increaseAllowance(address spender, uint256 addedValue)
         public
+        virtual
         returns (bool);
 
     function decreaseAllowance(address spender, uint256 subtractedValue)
         public
+        virtual
         returns (bool);
 }
 
-contract LegacyERC20 {
-    function transfer(address _spender, uint256 _value) public; // returns (bool);
+abstract contract LegacyERC20 {
+    function transfer(address _spender, uint256 _value) public virtual; // returns (bool);
 
     function transferFrom(
         address _owner,
         address _spender,
         uint256 _value
-    ) public; // returns (bool);
+    ) public virtual; // returns (bool);
 }
 
 // File: contracts/interfaces/IBurnableMintableERC677Token.sol
 
-pragma solidity 0.4.24;
+pragma solidity ^0.6.6;
 
-contract IBurnableMintableERC677Token is ERC677 {
-    function mint(address _to, uint256 _amount) public returns (bool);
+abstract contract IBurnableMintableERC677Token is ERC677 {
+    function mint(address _to, uint256 _amount) public virtual returns (bool);
 
-    function burn(uint256 _value) public;
+    function burn(uint256 _value) public virtual;
 
-    function claimTokens(address _token, address _to) external;
+    function claimTokens(address _token, address payable _to) external virtual;
 }
 
 // File: contracts/upgradeable_contracts/Sacrifice.sol
 
-pragma solidity 0.4.24;
+pragma solidity ^0.6.6;
 
 contract Sacrifice {
-    constructor(address _recipient) public payable {
+    constructor(address payable _recipient) public payable {
         selfdestruct(_recipient);
     }
 }
 
 // File: contracts/libraries/Address.sol
 
-pragma solidity 0.4.24;
+pragma solidity ^0.6.6;
 
 /**
  * @title Address
@@ -535,16 +555,16 @@ library Address {
      * @param _receiver address that will receive the native tokens
      * @param _value the amount of native tokens to send
      */
-    function safeSendValue(address _receiver, uint256 _value) internal {
+    function safeSendValue(address payable _receiver, uint256 _value) internal {
         if (!_receiver.send(_value)) {
-            (new Sacrifice).value(_value)(_receiver);
+            (new Sacrifice){value: _value}(_receiver);
         }
     }
 }
 
 // File: contracts/libraries/SafeERC20.sol
 
-pragma solidity 0.4.24;
+pragma solidity ^0.6.6;
 
 /**
  * @title SafeERC20
@@ -567,7 +587,7 @@ library SafeERC20 {
     ) internal {
         LegacyERC20(_token).transfer(_to, _value);
         assembly {
-            if returndatasize {
+            if returndatasize() {
                 returndatacopy(0, 0, 32)
                 if iszero(mload(0)) {
                     revert(0, 0)
@@ -589,7 +609,7 @@ library SafeERC20 {
     ) internal {
         LegacyERC20(_token).transferFrom(_from, address(this), _value);
         assembly {
-            if returndatasize {
+            if returndatasize() {
                 returndatacopy(0, 0, 32)
                 if iszero(mload(0)) {
                     revert(0, 0)
@@ -601,7 +621,7 @@ library SafeERC20 {
 
 // File: contracts/upgradeable_contracts/Claimable.sol
 
-pragma solidity 0.4.24;
+pragma solidity ^0.6.6;
 
 /**
  * @title Claimable
@@ -625,7 +645,7 @@ contract Claimable {
      * @param _token address of the claimed token or address(0) for native coins.
      * @param _to address of the tokens/coins receiver.
      */
-    function claimValues(address _token, address _to)
+    function claimValues(address _token, address payable _to)
         internal
         validAddress(_to)
     {
@@ -640,7 +660,7 @@ contract Claimable {
      * @dev Internal function for withdrawing all native coins from the contract.
      * @param _to address of the coins receiver.
      */
-    function claimNativeCoins(address _to) internal {
+    function claimNativeCoins(address payable _to) internal {
         uint256 value = address(this).balance;
         Address.safeSendValue(_to, value);
     }
@@ -652,14 +672,14 @@ contract Claimable {
      */
     function claimErc20Tokens(address _token, address _to) internal {
         ERC20Basic token = ERC20Basic(_token);
-        uint256 balance = token.balanceOf(this);
+        uint256 balance = token.balanceOf(address(this));
         _token.safeTransfer(_to, balance);
     }
 }
 
 // File: contracts/ERC677BridgeToken.sol
 
-pragma solidity 0.4.24;
+pragma solidity ^0.6.6;
 
 /**
  * @title ERC677BridgeToken
@@ -672,8 +692,8 @@ contract ERC677BridgeToken is
     MintableToken,
     Claimable
 {
+    using SafeMath for uint256;
     bytes4 internal constant ON_TOKEN_TRANSFER = 0xa4c0ed36; // onTokenTransfer(address,uint256,bytes)
-
     address internal bridgeContractAddr;
 
     /// customized params
@@ -681,14 +701,51 @@ contract ERC677BridgeToken is
     mapping(address => bool) public isWhiteListed;
     bool public enableAllTranfers;
 
+    address public childChainManagerProxy;
+
     constructor(
-        string _name,
-        string _symbol,
-        uint8 _decimals
+        string memory _name,
+        string memory _symbol,
+        uint8 _decimals,
+        address _childChainManagerProxy
     ) public DetailedERC20(_name, _symbol, _decimals) {
         // solhint-disable-previous-line no-empty-blocks
         admin = msg.sender;
         enableAllTranfers = false; // will false in production
+        childChainManagerProxy = _childChainManagerProxy;
+    }
+
+    function updateChildChainManager(address newChildChainManagerProxy)
+        external
+    {
+        require(
+            newChildChainManagerProxy != address(0),
+            "Bad ChildChainManagerProxy address"
+        );
+        require(msg.sender == admin, "You're not allowed");
+
+        childChainManagerProxy = newChildChainManagerProxy;
+    }
+
+    function deposit(address user, bytes calldata depositData) external {
+        require(
+            msg.sender == childChainManagerProxy,
+            "You're not allowed to deposit"
+        );
+
+        uint256 amount = abi.decode(depositData, (uint256));
+
+        // `amount` token getting minted here & equal amount got locked in RootChainManager
+        totalSupply_ = totalSupply_.add(amount);
+        balances[user] = balances[user].add(amount);
+
+        emit Transfer(address(0), user, amount);
+    }
+
+    function withdraw(uint256 amount) external {
+        balances[msg.sender] = balances[msg.sender].sub(amount);
+        totalSupply_ = totalSupply_.sub(amount);
+        emit Transfer(msg.sender, address(0), amount);
     }
 
     function addWhiteListAddress(address _address)
@@ -715,11 +772,32 @@ contract ERC677BridgeToken is
         _;
     }
 
+    function burn(uint256 _value)
+        public
+        override(BurnableToken, IBurnableMintableERC677Token)
+    {
+        _burn(msg.sender, _value);
+    }
+
+    function mint(address _to, uint256 _amount)
+        public
+        override(MintableToken, IBurnableMintableERC677Token)
+        hasMintPermission
+        canMint
+        returns (bool)
+    {
+        totalSupply_ = totalSupply_.add(_amount);
+        balances[_to] = balances[_to].add(_amount);
+        emit Mint(_to, _amount);
+        emit Transfer(address(0), _to, _amount);
+        return true;
+    }
+
     function transferAndCall(
         address _to,
         uint256 _value,
-        bytes _data
-    ) external validRecipient(_to) returns (bool) {
+        bytes calldata _data
+    ) external override validRecipient(_to) returns (bool) {
         require(superTransfer(_to, _value));
         emit Transfer(msg.sender, _to, _value, _data);
 
@@ -752,7 +830,11 @@ contract ERC677BridgeToken is
         return super.transfer(_to, _value);
     }
 
-    function transfer(address _to, uint256 _value) public returns (bool) {
+    function transfer(address _to, uint256 _value)
+        public
+        override(BasicToken, ERC20Basic)
+        returns (bool)
+    {
         require(superTransfer(_to, _value));
         callAfterTransfer(msg.sender, _to, _value);
         return true;
@@ -762,7 +844,7 @@ contract ERC677BridgeToken is
         address _from,
         address _to,
         uint256 _value
-    ) public returns (bool) {
+    ) public override(ERC20, StandardToken) returns (bool) {
         require(
             isWhiteListedTransfer(_from, _to),
             "Atleast one of the address (src or dst) should be whitelisted or all transfers must be enabled via enableAllTransfers()"
@@ -805,19 +887,19 @@ contract ERC677BridgeToken is
         address _from,
         address _to,
         uint256 _value,
-        bytes _data
+        bytes memory _data
     ) private returns (bool) {
-        return
-            _to.call(
-                abi.encodeWithSelector(ON_TOKEN_TRANSFER, _from, _value, _data)
-            );
+        (bool success, ) = _to.call(
+            abi.encodeWithSelector(ON_TOKEN_TRANSFER, _from, _value, _data)
+        );
+        return success;
     }
 
-    function finishMinting() public returns (bool) {
+    function finishMinting() public override returns (bool) {
         revert();
     }
 
-    function renounceOwnership() public onlyOwner {
+    function renounceOwnership() public override onlyOwner {
         revert();
     }
 
@@ -826,12 +908,17 @@ contract ERC677BridgeToken is
      * @param _token address of the claimed token or address(0) for native coins.
      * @param _to address of the tokens/coins receiver.
      */
-    function claimTokens(address _token, address _to) external onlyOwner {
+    function claimTokens(address _token, address payable _to)
+        external
+        override
+        onlyOwner
+    {
         claimValues(_token, _to);
     }
 
     function increaseAllowance(address spender, uint256 addedValue)
         public
+        override
         returns (bool)
     {
         return super.increaseApproval(spender, addedValue);
@@ -839,6 +926,7 @@ contract ERC677BridgeToken is
 
     function decreaseAllowance(address spender, uint256 subtractedValue)
         public
+        override
         returns (bool)
     {
         return super.decreaseApproval(spender, subtractedValue);
